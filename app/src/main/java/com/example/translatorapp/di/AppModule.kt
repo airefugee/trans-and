@@ -3,12 +3,16 @@ package com.example.translatorapp.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.example.translatorapp.BuildConfig
 import com.example.translatorapp.data.datasource.HistoryDao
 import com.example.translatorapp.data.datasource.HistoryDatabase
 import com.example.translatorapp.data.datasource.UserPreferencesDataSource
 import com.example.translatorapp.data.repository.TranslationRepositoryImpl
 import com.example.translatorapp.domain.repository.TranslationRepository
+import com.example.translatorapp.network.ApiConfig
 import com.example.translatorapp.network.ApiRelayService
+import com.example.translatorapp.network.RealtimeApi
+import com.example.translatorapp.network.RealtimeEventStream
 import com.example.translatorapp.util.DispatcherProvider
 import com.example.translatorapp.webrtc.WebRtcClient
 import dagger.Module
@@ -49,8 +53,16 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit = Retrofit.Builder()
-        .baseUrl("https://api.realtime-proxy.example/")
+    fun provideApiConfig(): ApiConfig = ApiConfig(BuildConfig.REALTIME_BASE_URL)
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(
+        okHttpClient: OkHttpClient,
+        json: Json,
+        apiConfig: ApiConfig
+    ): Retrofit = Retrofit.Builder()
+        .baseUrl(apiConfig.baseUrl)
         .client(okHttpClient)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
@@ -58,6 +70,18 @@ object AppModule {
     @Provides
     @Singleton
     fun provideApiRelayService(retrofit: Retrofit): ApiRelayService = retrofit.create(ApiRelayService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideRealtimeApi(service: ApiRelayService): RealtimeApi = RealtimeApi(service)
+
+    @Provides
+    @Singleton
+    fun provideRealtimeEventStream(
+        okHttpClient: OkHttpClient,
+        json: Json,
+        apiConfig: ApiConfig
+    ): RealtimeEventStream = RealtimeEventStream(okHttpClient, json, apiConfig)
 
     @Provides
     @Singleton
