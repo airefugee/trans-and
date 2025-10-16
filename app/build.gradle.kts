@@ -1,5 +1,10 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
+val localProperties = gradleLocalProperties(rootDir)
+val realtimeBaseUrl =
+    (localProperties.getProperty("realtime.apiBaseUrl") ?: "https://api.realtime-proxy.example/")
+        .replace("\"", "\\\"")
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -18,6 +23,8 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
+
+        buildConfigField("String", "REALTIME_BASE_URL", "\"$realtimeBaseUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

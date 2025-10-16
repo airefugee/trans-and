@@ -11,7 +11,7 @@ interface ApiRelayService {
     suspend fun updateSession(@Body body: SessionUpdateRequest)
 
     @POST("session/stop")
-    suspend fun stopSession()
+    suspend fun stopSession(@Body body: SessionStopRequest)
 
     @POST("session/metrics")
     suspend fun sendMetrics(@Body body: SessionMetricsRequest)
